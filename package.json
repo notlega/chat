@@ -7,14 +7,14 @@
     "lint:frontend": "nx lint chat-frontend:lint",
     "lint:backend": "nx lint chat-backend:lint",
     "build": "nx run-many --target=build",
-    "build:frontend": "nx run chat-frontend:build:production",
-    "build:backend": "nx run chat-backend:build:production",
-    "start": "nx run-many --target=start",
-    "start:frontend": "nx run chat-frontend:start",
-    "start:backend": "nx run chat-backend:start",
+    "build:frontend": "nx build chat-frontend",
+    "build:backend": "nx build chat-backend",
+    "start": "nx run-many --target=serve --prod",
+    "start:frontend": "nx serve chat-frontend --prod",
+    "start:backend": "nx serve chat-backend --prod",
     "dev": "nx run-many --target=serve",
-    "dev:frontend": "nx run chat-frontend:serve",
-    "dev:backend": "nx run chat-backend:serve"
+    "dev:frontend": "nx serve chat-frontend",
+    "dev:backend": "nx serve chat-backend"
   },
   "private": true,
   "dependencies": {

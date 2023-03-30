@@ -25,23 +25,41 @@ npm ci
 
 If you do not have Nx installed globally, add `npx` before each command
 
+To build both applications in parallel
+
+```bash
+npm run build
+```
+
 To build each application
 
 ```bash
-nx run chat-frontend:build:production
-nx run chat-backend:build:production
+npm run build:frontend
+npm run build:backend
+```
+
+To start both applications in parallel and production mode
+
+```bash
+npm run start
 ```
 
 To start each application
 
 ```bash
-nx run chat-frontend:serve:production
-nx run chat-backend:serve:production
+npm run start:frontend
+npm run start:backend
 ```
 
-To start both applications in dev mode
+To start both applications in parallel and development mode
 
 ```bash
-nx run chat-frontend:serve:development
-nx run chat-backend:serve:development
+npm run dev
+```
+
+To start each application in development mode
+
+```bash
+npm run dev:frontend
+npm run dev:backend
 ```
