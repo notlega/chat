@@ -7,7 +7,7 @@ This is a chat webapp built using NextJS, Express, and Socket.io
 - NodeJS
 - Nx (globally installed - optional)
 
-## Installation
+## Installation and Setup
 
 Clone the repository
 
@@ -21,9 +21,19 @@ Install dependencies
 npm ci
 ```
 
+Copy `.env.example` and rename to `.env.local` in the same directory
+
+Fill in the values for the environment variables
+
+Run the following command to setup prisma
+
+```bash
+npm run prisma-setup
+```
+
 ## Usage
 
-If you do not have Nx installed globally, add `npx` before each command
+**If you do not have Nx installed globally, add `npx` before each command**
 
 To build both applications in parallel
 

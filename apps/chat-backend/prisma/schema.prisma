@@ -1,13 +1,12 @@
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./db.sql"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-model Todo {
-  id String @id @default(cuid())
-  @@map("todos")
+model example_table {
+  id Int @id(map: "example_table_pk") @default(autoincrement())
 }

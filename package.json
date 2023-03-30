@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
+    "prisma-setup": "nx prisma-pull chat-backend&&nx prisma-generate chat-backend",
     "lint": "nx run-many --target=lint",
     "lint:frontend": "nx lint chat-frontend:lint",
     "lint:backend": "nx lint chat-backend:lint",
