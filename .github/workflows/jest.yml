@@ -11,7 +11,7 @@ on:
     branches: ['develop', 'main']
 
 jobs:
-  setup:
+  setup-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -43,7 +43,7 @@ jobs:
         run: npm run build:backend
 
       - name: Serve Backend
-        run: npm run serve:backend
+        run: npm run start:backend
 
       - name: Run Tests
         run: npm run test:backend
