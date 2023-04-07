@@ -1,6 +1,9 @@
 {
-  "extends": ["../../.eslintrc.json"],
+  "extends": ["standard-with-typescript", "../../.eslintrc.json"],
   "ignorePatterns": ["!**/*"],
+  "parserOptions": {
+    "project": ["apps/chat-backend/tsconfig.*?.json"]
+  },
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],

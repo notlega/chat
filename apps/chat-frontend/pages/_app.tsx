@@ -1,18 +1,12 @@
 import { AppProps } from 'next/app';
-import Head from 'next/head';
-import './styles.css';
+import { SessionProvider } from 'next-auth/react';
 
-function CustomApp({ Component, pageProps }: AppProps) {
+const App = ({ Component, pageProps: { session, ...pageProps } }: AppProps) => {
   return (
-    <>
-      <Head>
-        <title>Welcome to chat-frontend!</title>
-      </Head>
-      <main className="app">
-        <Component {...pageProps} />
-      </main>
-    </>
+    <SessionProvider session={session}>
+      <Component {...pageProps} />
+    </SessionProvider>
   );
-}
+};
 
-export default CustomApp;
+export default App;

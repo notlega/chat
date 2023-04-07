@@ -8,6 +8,9 @@ tmp
 # dependencies
 node_modules
 
+# prisma seeding logs
+logs
+
 # IDEs and editors
 /.idea
 .project

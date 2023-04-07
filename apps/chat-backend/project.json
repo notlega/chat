@@ -12,7 +12,7 @@
         "target": "node",
         "compiler": "tsc",
         "outputPath": "dist/apps/chat-backend",
-        "main": "apps/chat-backend/src/main.ts",
+        "main": "apps/chat-backend/src/index.ts",
         "tsConfig": "apps/chat-backend/tsconfig.app.json",
         "assets": ["apps/chat-backend/src/assets"],
         "isolatedConfig": true,
@@ -99,6 +99,13 @@
       "executor": "@nx-tools/nx-prisma:studio",
       "options": {
         "schema": "prisma/schema.prisma"
+      }
+    },
+    "prisma-seed": {
+      "executor": "@nx-tools/nx-prisma:seed",
+      "options": {
+        "script": "prisma/seed.ts",
+        "tsConfig": "tsconfig.spec.json"
       }
     }
   },
