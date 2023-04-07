@@ -1,3 +1,4 @@
 import morgan from './morgan';
+import loginValidation from './validation';
 
-export default { morgan, ...morgan };
+export { morgan, loginValidation };

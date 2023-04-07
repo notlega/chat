@@ -12,7 +12,7 @@ const Users: IUsers[] = [
   {
     username: 'lega',
     email: 'onghinjourn@gmail.com',
-    password: 'a0f2105abc31c0fa588e7afde8907e9990b22d1d769f7ca6b9b94671bbfcf2d8'
+    password: '$2a$12$qG7eUNKlbwW1e7nXXuUlYeRTUsA8OsrPyJDZ6TbRT19kmkKYCSpNu'
   }
 ];
 

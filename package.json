@@ -62,6 +62,7 @@
     "@nx-tools/nx-prisma": "^4.0.3",
     "@testing-library/react": "14.0.0",
     "@tsconfig/node16": "^1.0.3",
+    "@types/bcrypt": "^5.0.0",
     "@types/cors": "^2.8.13",
     "@types/express": "4.17.13",
     "@types/jest": "^29.4.0",

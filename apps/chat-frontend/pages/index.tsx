@@ -7,15 +7,18 @@ const Home = () => {
 
   return (
     <div>
-      {session ? (
-        <Typography>Signed In as {session.user.email}</Typography>
+      {session?.user !== undefined ? (
+        <>
+          <Typography>Signed In as {session.user.name}</Typography>
+          <Typography>Email: {session.user.email}</Typography>
+        </>
       ) : (
         <Typography>Not Signed In</Typography>
       )}
-      <Button variant="contained" onClick={() => signIn()}>
+      <Button variant="contained" onClick={() => void signIn()}>
         Sign In
       </Button>
-      <Button variant="contained" onClick={() => signOut()}>
+      <Button variant="contained" onClick={() => void signOut()}>
         Sign Out
       </Button>
     </div>

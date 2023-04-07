@@ -1,10 +1,20 @@
-import { Router } from 'express';
-import loginValidation from '../middlewares/validation';
+import {
+  type NextFunction,
+  type Request,
+  type Response,
+  Router,
+} from 'express';
+
+import { loginValidation } from '../middlewares';
+
+import Authentication from '../controllers/auth';
 
 const router = Router();
 
-router.post('/login', loginValidation, (req, res, next) => {
-  res.json(req.body);
-});
+router.post(
+  '/login',
+  loginValidation,
+  Authentication.login
+);
 
 export default router;

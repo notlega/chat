@@ -9,7 +9,7 @@ const prismaClient: PrismaClient = new PrismaClient();
 
 // password for users: `email` until before @
 // eg. email: `john@gmail.com` => password: `john`
-// each password has gone through 12 rounds of bcrypt and one round of sha256
+// each password has gone through 12 rounds of bcrypt hashing
 
 const main = async (): Promise<void> => {
   loggers[enums.WINSTON.INFO]('Clearing database...');
