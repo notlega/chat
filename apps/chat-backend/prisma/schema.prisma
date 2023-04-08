@@ -7,6 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model example_table {
-  id Int @id(map: "example_table_pk") @default(autoincrement())
+model users {
+  id              String   @id(map: "users_pk") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username        String   @db.VarChar
+  email           String   @db.VarChar
+  profile_picture String?  @db.VarChar
+  password        String   @db.VarChar
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime @default(now()) @db.Timestamptz(6)
 }

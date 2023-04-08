@@ -1,11 +1,15 @@
 {
   "extends": [
+    "standard-with-typescript",
     "plugin:@nrwl/nx/react-typescript",
     "next",
     "next/core-web-vitals",
     "../../.eslintrc.json"
   ],
   "ignorePatterns": ["!**/*", ".next/**/*"],
+  "parserOptions": {
+    "project": ["apps/chat-frontend/tsconfig(.*)?.json"]
+  },
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
@@ -18,7 +22,9 @@
     },
     {
       "files": ["*.ts", "*.tsx"],
-      "rules": {}
+      "rules": {
+        "no-void": "off"
+      }
     },
     {
       "files": ["*.js", "*.jsx"],

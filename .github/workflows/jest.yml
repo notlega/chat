@@ -1,29 +1,64 @@
-name: jest
+name: Jest Unit Testing for Backend
+
+# Skip job run if PR updated
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
   pull_request:
+    branches: ['develop', 'main']
 
 jobs:
-  main:
-    name: Nx Cloud - Main Job
-    uses: nrwl/ci/.github/workflows/nx-cloud-main.yml@v0.11.3
-    with:
-      main-branch-name: main
-      number-of-agents: 3
-      init-commands: |
-        npx nx-cloud start-ci-run --stop-agents-after="build" --agent-count=3
-      parallel-commands: |
-        npx nx-cloud record -- npx nx format:check
-      parallel-commands-on-agents: |
-        npx nx affected --target=lint --parallel=3
-        npx nx affected --target=test --parallel=3 --ci --code-coverage
-        npx nx affected --target=build --parallel=3
+  setup-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
 
-  agents:
-    name: Nx Cloud - Agents
-    uses: nrwl/ci/.github/workflows/nx-cloud-agents.yml@v0.11.3
-    with:
-      number-of-agents: 3
+      - name: Create .env.local
+        uses: SpicyPizza/create-envfile@v1.3.0
+        with:
+          envkey_CLIENT_ORIGIN_URL: 'http://localhost:4200'
+          envkey_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          envkey_NODE_ENV: 'production'
+          directory: ''
+          file_name: .env.local
+          fail_on_empty: true
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Setup Prisma
+        run: npm run prisma-setup
+
+      - name: Reseed Database
+        run: npm run seed
+
+      - name: Build Backend
+        run: npm run build:backend
+
+      - name: Run Tests
+        run: npm run test:backend
+
+      - uses: actions/upload-artifact@v3
+        if: ${{ always() }}
+        with:
+          name: logs
+          path: dist/logs
+
+      - uses: actions/upload-artifact@v3
+        if: ${{ always() }}
+        with:
+          name: coverage
+          path: coverage/apps/chat-backend
+
+      - uses: actions/upload-artifact@v3
+        if: ${{ success() }}
+        with:
+          name: chat-backend
+          path: dist/apps/chat-backend
