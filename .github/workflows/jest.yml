@@ -42,9 +42,6 @@ jobs:
       - name: Build Backend
         run: npm run build:backend
 
-      - name: Serve Backend
-        run: npm run start:backend
-
       - name: Run Tests
         run: npm run test:backend
 
@@ -53,6 +50,12 @@ jobs:
         with:
           name: logs
           path: dist/logs
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: coverage
+          path: coverage/apps/chat-backend
 
       - uses: actions/upload-artifact@v3
         if: success()
