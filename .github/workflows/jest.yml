@@ -1,4 +1,4 @@
-name: Jest Unit Testing for Backend
+name: Jest Unit Testing for API Routes
 
 # Skip job run if PR updated
 concurrency:
@@ -39,11 +39,11 @@ jobs:
       - name: Reseed Database
         run: npm run seed
 
-      - name: Build Backend
-        run: npm run build:backend
+      - name: Build Project
+        run: npm run build:propnex
 
       - name: Run Tests
-        run: npm run test:backend
+        run: npm run test:propnex
 
       - uses: actions/upload-artifact@v3
         if: ${{ always() }}
@@ -55,10 +55,10 @@ jobs:
         if: ${{ always() }}
         with:
           name: coverage
-          path: coverage/apps/chat-backend
+          path: coverage/apps/propnex
 
       - uses: actions/upload-artifact@v3
         if: ${{ success() }}
         with:
-          name: chat-backend
-          path: dist/apps/chat-backend
+          name: propnex
+          path: dist/apps/propnex

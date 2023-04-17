@@ -1,6 +1,6 @@
-# chat
+# propnex
 
-This is a chat webapp built using NextJS, Express, and Socket.io
+This is a propnex webapp built using NextJS, Express, and Socket.io
 
 ## Requirements
 
@@ -12,7 +12,7 @@ This is a chat webapp built using NextJS, Express, and Socket.io
 Clone the repository
 
 ```bash
-git clone https://github.com/notlega/chat.git
+git clone https://github.com/notlega/propnex.git
 ```
 
 Install dependencies
@@ -44,11 +44,10 @@ npm run build
 To build each application
 
 ```bash
-npm run build:frontend
-npm run build:backend
+npm run build:appname
 ```
 
-To start both applications in parallel and production mode
+To start all applications in parallel and production mode
 
 ```bash
 npm run start
@@ -57,11 +56,10 @@ npm run start
 To start each application
 
 ```bash
-npm run start:frontend
-npm run start:backend
+npm run start:appname
 ```
 
-To start both applications in parallel and development mode
+To start all applications in parallel and development mode
 
 ```bash
 npm run dev
@@ -70,6 +68,5 @@ npm run dev
 To start each application in development mode
 
 ```bash
-npm run dev:frontend
-npm run dev:backend
+npm run dev:appname
 ```
