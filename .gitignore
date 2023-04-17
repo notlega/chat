@@ -44,6 +44,9 @@ Thumbs.db
 # Next.js
 .next
 
+# nx-container
+.nx-container/*
+
 # Environment variables
 .env
 .env.local
