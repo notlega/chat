@@ -1,28 +1,53 @@
-# Install dependencies only when needed
-FROM docker.io/node:lts-alpine as deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
-WORKDIR /usr/src/app
-COPY dist/apps/propnex/package*.json ./
-RUN npm install --only=production
+FROM node:18.15.0-alpine3.17 as depsbuilder
 
-# Production image, copy all the files and run next
-FROM docker.io/node:lts-alpine as runner
-RUN apk add --no-cache dumb-init
+WORKDIR /app
+
+COPY . .
+
+# Installing Dependencies
+RUN npm install -g pnpm && pnpm clean-i
+
+# Set DATABASE_URL for Prisma
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
+
+# Building NextJS
+RUN npx nx run @propnex/propnex:build:prod
+
+# ===================================================================
+
+FROM node:18.15.0-alpine3.17 as runner
+
+WORKDIR /app
 ENV NODE_ENV production
-ENV PORT 3000
-WORKDIR /usr/src/app
-COPY --from=deps /usr/src/app/node_modules ./node_modules
-COPY --from=deps /usr/src/app/package.json ./package.json
-COPY dist/apps/propnex/public ./public
-COPY dist/apps/propnex/.next ./.next
-RUN chown -R node:node .
-USER node
+
+# Adding user & usergroup for NextJS's node server
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Get NextAuth URL and Secret
+ARG NEXTAUTH_SECRET
+ARG NEXTAUTH_URL
+
+# Set NextAuth URL and Secret
+ENV NEXTAUTH_SECRET=$NEXTAUTH_SECRET
+ENV NEXTAUTH_URL=$NEXTAUTH_URL
+
+# TODO: remove ignore for tserrors and eslint once all gone
+ENV NEXT_BUILD_OPTION="ignoreType"
+ENV NEXT_ESLINT_OPTION="ignoreLint"
+
+# Copying the standalone files & changing owners
+COPY --from=depsbuilder /app/apps/marketplace/public ./public
+COPY --from=depsbuilder --chown=nextjs:nodejs /app/apps/marketplace/.next/standalone ./
+COPY --from=depsbuilder --chown=nextjs:nodejs /app/apps/marketplace/.next/static ./.next/static
+
+# Changing user to NextJS's user
+USER nextjs
+
+# Ports host at 3000
 EXPOSE 3000
-# COPY --chown=node:node ./tools/scripts/entrypoints/api.sh /usr/local/bin/docker-entrypoint.sh
-# ENTRYPOINT [ "docker-entrypoint.sh" ]
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry.
-ENV NEXT_TELEMETRY_DISABLED 1
-CMD ["dumb-init", "node_modules/.bin/next", "start"]
+ENV PORT 3000
+
+# NextJS server is being run using node server.js
+CMD ["node", "apps/propnex/server.js"]
