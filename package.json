@@ -6,6 +6,7 @@
     "build": "nx run-many --target=build:prod",
     "build:propnex": "nx build:prod @propnex/propnex",
     "build:sandbox": "nx build:prod @propnex/sandbox",
+    "clean": "nx run-many --target=clean",
     "dev": "nx run-many --target=serve",
     "dev:propnex": "nx dev @propnex/propnex",
     "dev:sandbox": "nx dev @propnex/sandbox",
@@ -26,6 +27,7 @@
     "nx": "15.8.9",
     "prettier": "^2.6.2",
     "prisma": "^4.5.0",
+    "rimraf": "^5.0.0",
     "ts-node": "10.9.1",
     "tslib": "^2.5.0",
     "typescript": "~4.9.5"

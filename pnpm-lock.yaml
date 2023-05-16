@@ -22,6 +22,9 @@ importers:
       prisma:
         specifier: ^4.5.0
         version: 4.13.0
+      rimraf:
+        specifier: ^5.0.0
+        version: 5.0.0
       ts-node:
         specifier: 10.9.1
         version: 10.9.1(@types/node@18.15.3)(typescript@4.9.5)
