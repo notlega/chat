@@ -9,13 +9,20 @@ const prismaClient: PrismaClient = new PrismaClient();
 // each password has gone through 12 rounds of bcrypt hashing
 
 const main = async (): Promise<void> => {
+  console.log('Clearing database...');
+
   await Promise.allSettled([prismaClient.users.deleteMany()]);
 
   // TODO: write seq reset
 
+  console.log('Sequences reset');
+  console.log('Seeding database...');
+
   const { count: usersCount } = await prismaClient.users.createMany({
     data: Users,
   });
+
+  console.log(`Seeded ${usersCount} users`);
 };
 
 main()

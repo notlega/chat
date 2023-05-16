@@ -1,12 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { compare } from 'bcrypt';
+import { compare } from 'bcryptjs';
 
-import PrismaClient from '../../../utils/prisma';
+import PrismaClient from '@propnex/db';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { email, password }: { email: string; password: string } = req.body;
 
-  const user = await PrismaClient.user.findFirst({
+  const user = await PrismaClient.users.findFirst({
     where: {
       email,
     },

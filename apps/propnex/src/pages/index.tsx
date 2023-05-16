@@ -1,15 +1,14 @@
 import type { GetServerSideProps } from 'next';
 import { Typography } from '@mui/material';
-import PropTypes from 'prop-types';
 import Button from '@mui/material/Button';
 import { signIn, signOut } from 'next-auth/react';
-import { getServerSession } from 'next-auth/next';
+import { Session, getServerSession } from 'next-auth/next';
 
 import authOptions from './api/auth/[...nextauth]';
 
-const propTypes = {
-  session: PropTypes.object,
-};
+interface HomeProps {
+  session: Session;
+}
 
 const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions);
@@ -21,7 +20,7 @@ const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
-const Home = ({ session }) => {
+const Home = ({ session }: HomeProps) => {
   return (
     <div>
       {session?.user !== undefined && session?.user !== null ? (
@@ -41,8 +40,6 @@ const Home = ({ session }) => {
     </div>
   );
 };
-
-Home.propTypes = propTypes;
 
 export { getServerSideProps };
 export default Home;
