@@ -1,40 +1,29 @@
 {
-  "extends": [
-    "standard-with-typescript",
-    "plugin:@nrwl/nx/react-typescript",
-    "next",
-    "next/core-web-vitals",
-    "../../.eslintrc.json"
-  ],
-  "ignorePatterns": ["!**/*", ".next/**/*"],
-  "parserOptions": {
-    "project": ["apps/propnex-frontend/tsconfig(.*)?.json"]
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
   },
-  "overrides": [
-    {
-      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
-      "rules": {
-        "@next/next/no-html-link-for-pages": [
-          "error",
-          "apps/propnex-frontend/pages"
-        ]
-      }
+  "extends": ["next", "../../.eslintrc.json"],
+  "ignorePatterns": ["!**/*", ".next/**/*"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": ["apps/propnex-frontend/tsconfig(.*)?.json"],
+    "ecmaFeatures": {
+      "jsx": true
     },
-    {
-      "files": ["*.ts", "*.tsx"],
-      "rules": {
-        "no-void": "off"
-      }
-    },
-    {
-      "files": ["*.js", "*.jsx"],
-      "rules": {}
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "globals": {
+    "JSX": true
+  },
+  "settings": {
+    "next": {
+      "rootDir": ["."]
     }
-  ],
+  },
   "rules": {
     "@next/next/no-html-link-for-pages": "off"
-  },
-  "env": {
-    "jest": true
   }
 }
