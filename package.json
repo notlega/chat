@@ -1,0 +1,37 @@
+{
+  "name": "chat",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "author": "Ong Hin Journ <onghinjourn@gmail.com>",
+  "packageManager": "pnpm@11.20.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "keywords": [
+    "chat",
+    "websocket",
+    "react"
+  ],
+  "scripts": {
+    "build": "concurrently \"pnpm --filter contracts run build\" \"pnpm --filter centrifugo run build\"",
+    "build:centrifugo": "pnpm --filter centrifugo run build",
+    "build:contracts": "pnpm --filter contracts run build",
+    "dev": "concurrently \"pnpm --filter server run dev\" \"pnpm --filter frontend run dev\"",
+    "dev:server": "pnpm --filter server run dev",
+    "dev:frontend": "pnpm --filter frontend run dev",
+    "lint": "concurrently \"pnpm --filter frontend lint\" \"pnpm --filter server lint\" \"pnpm --filter centrifugo lint\" \"pnpm --filter contracts lint\"",
+    "lint:server": "pnpm --filter server lint",
+    "lint:frontend": "pnpm --filter frontend lint",
+    "lint:centrifugo": "pnpm --filter centrifugo lint",
+    "lint:contracts": "pnpm --filter contracts lint",
+    "test": "concurrently \"pnpm --filter server test\" \"pnpm --filter frontend test\"",
+    "test:frontend": "pnpm --filter frontend test",
+    "test:server": "pnpm --filter server test"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "concurrently": "^10.0.3",
+    "typescript": "catalog:"
+  }
+}
