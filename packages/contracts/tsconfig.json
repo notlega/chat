@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "lib": [
+      "ESNext"
+    ],
+    "target": "ESNext",
+    "esModuleInterop": true,
+    "noEmit": true,
+    "declaration": true,
+    "declarationMap": true,
+  },
+}
