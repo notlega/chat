@@ -1,0 +1,3 @@
+:8080 {
+  reverse_proxy chat-centrifugo-1:8000 chat-centrifugo-2:8000 chat-centrifugo-3:8000
+}

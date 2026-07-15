@@ -1,0 +1,66 @@
+name: chat
+
+x-centrifugo: &centrifugo
+  image: centrifugo/centrifugo:latest
+  command: centrifugo
+  restart: unless-stopped
+  depends_on:
+    chat-postgres:
+      condition: service_healthy
+  env_file: ./configs/centrifugo/centrifugo.env
+  networks:
+    - chat-network
+
+services:
+  chat-postgres:
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - chat-postgres-data:/var/lib/postgresql
+    networks:
+      - chat-network
+
+  chat-centrifugo-1:
+    <<: *centrifugo
+    environment:
+      CENTRIFUGO_NODE_NAME: node-1
+
+  chat-centrifugo-2:
+    <<: *centrifugo
+    environment:
+      CENTRIFUGO_NODE_NAME: node-2
+
+  chat-centrifugo-3:
+    <<: *centrifugo
+    environment:
+      CENTRIFUGO_NODE_NAME: node-3
+
+  chat-caddy:
+    image: caddy:latest
+    ports:
+      - 8080:8080
+    volumes:
+      - ./configs/caddy:/etc/caddy
+    depends_on:
+      - chat-centrifugo-1
+      - chat-centrifugo-2
+      - chat-centrifugo-3
+    networks:
+      - chat-network
+
+volumes:
+  chat-postgres-data:
+    name: chat-postgres-data
+networks:
+  chat-network:
+    name: chat-network
