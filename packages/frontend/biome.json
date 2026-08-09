@@ -1,0 +1,43 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": "//",
+  "files": {
+    "includes": [
+      "src/**/*",
+      "__tests__/**/*",
+      "vite.config.ts",
+      "vitest.config.ts",
+      "globals.d.ts",
+      "vite-env.d.ts",
+      "!**/dist",
+      "!**/src/components/ui/**"
+    ]
+  },
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useSortedClasses": {
+          "level": "warn",
+          "fix": "safe"
+        }
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "off"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "__tests__/**"
+      ],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noEmptyPattern": "off"
+          }
+        }
+      }
+    }
+  ]
+}
