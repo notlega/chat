@@ -439,4 +439,4 @@ This is tracked as an upstream compatibility limitation.
 
 ## License
 
-MIT
+Apache-2.0
