@@ -14,7 +14,6 @@
     "dev": "tsx watch src/server.ts",
     "fix": "biome fix src/**/*.ts",
     "format": "biome format src/**/*.ts",
-    "image": "docker build -t chat-server:latest .",
     "lint": "biome lint src/**/*.ts",
     "start": "node dist/server.cjs",
     "test": "vitest run"
