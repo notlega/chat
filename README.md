@@ -6,7 +6,7 @@ Realtime anonymous group chat built on a pnpm monorepo with React, Fastify, Post
 
 Chat is a single-channel anonymous group chat application. Users can join with one click, without creating an account, and exchange messages in real time.
 
-The project is primarily an exploration of **production-grade realtime application architecture**, with an emphasis on:
+The project explores **production-oriented realtime application architecture**, with an emphasis on:
 
 * Self-hosted realtime delivery using Centrifugo
 * End-to-end type-safe contracts shared between frontend and backend
@@ -15,7 +15,76 @@ The project is primarily an exploration of **production-grade realtime applicati
 * Containerized local infrastructure
 * A modular pnpm monorepo
 
-### Core Flow
+At a high level, the API handles authentication, validation, and persistence while Centrifugo handles WebSocket connections and realtime message delivery.
+
+---
+
+## Tech Stack
+
+| Layer          | Technology                       |
+| -------------- | -------------------------------- |
+| Frontend       | React 19, Vite 8, TypeScript 6   |
+| Styling        | Tailwind CSS 4, Base UI          |
+| Routing        | `@typeroute/router`              |
+| API            | Fastify 5                        |
+| Authentication | better-auth                      |
+| Validation     | Zod, `fastify-type-provider-zod` |
+| Realtime       | Centrifugo                       |
+| Database       | PostgreSQL                       |
+| ORM            | Drizzle ORM                      |
+| Migrations     | drizzle-kit                      |
+| Testing        | Vitest, Testing Library          |
+| Code Quality   | Biome                            |
+| Monorepo       | pnpm workspaces + catalog        |
+| Infrastructure | Docker Compose, Caddy            |
+
+---
+
+## Architecture
+
+The application is divided into four packages:
+
+```mermaid
+graph TD
+  ROOT[chat] --> packages[packages/]
+  packages --> contracts["contracts/ — shared Zod schemas and inferred types"]
+  packages --> frontend["frontend/ — React SPA"]
+  packages --> server["server/ — Fastify API, database, authentication"]
+  packages --> centrifugo["centrifugo/ — Centrifugo HTTP API wrapper"]
+
+  ROOT --> configs[configs/]
+  configs --> caddy["caddy/ — Caddy reverse proxy configuration"]
+  configs --> centrifugoconfig["centrifugo/ — Centrifugo configuration"]
+
+  ROOT --> compose["compose.yaml — local infrastructure"]
+```
+
+### Request and Realtime Flow
+
+```mermaid
+graph TD
+  B[Browser<br/>React + Vite]
+  A[Fastify API]
+  CF[Centrifugo Cluster]
+  DB[(PostgreSQL)]
+
+  B -- "HTTP / REST" --> A
+  B -- "WebSocket" --> CF
+  A -- "persist" --> DB
+  A -- "publish" --> CF
+  CF -- "broadcast" --> B
+```
+
+The application separates the request path from the realtime delivery path:
+
+* **Fastify** handles authenticated HTTP requests, validation, and database persistence.
+* **PostgreSQL** stores messages.
+* **Centrifugo** manages WebSocket connections and broadcasts publications.
+* **The frontend** communicates with Fastify over HTTP and Centrifugo over WebSocket.
+
+This keeps WebSocket connection state outside the application server.
+
+### Message Lifecycle
 
 ```mermaid
 sequenceDiagram
@@ -41,68 +110,13 @@ sequenceDiagram
 
 Both the server and client validate realtime payloads against the same Zod schemas, keeping the wire format consistent.
 
----
+### Persistence and Realtime Consistency
 
-## Architecture
+Message persistence and realtime delivery are separate operations.
 
-The application is split into four main packages:
+The message is first persisted in PostgreSQL and then published to Centrifugo. This means a successful database write and a successful realtime publication are not one atomic operation.
 
-```mermaid
-graph TD
-  ROOT[chat] --> packages[packages/]
-  packages --> contracts["contracts/ — shared Zod schemas and inferred types"]
-  packages --> frontend["frontend/ — React SPA"]
-  packages --> server["server/ — Fastify API, database, authentication"]
-  packages --> centrifugo["centrifugo/ — Centrifugo HTTP API wrapper"]
-  ROOT --> configs[configs/]
-  configs --> caddy["caddy/ — Caddy reverse proxy configuration"]
-  configs --> centrifugoconfig["centrifugo/ — Centrifugo configuration"]
-  ROOT --> compose["compose.yaml — local infrastructure"]
-```
-
-### Request and Realtime Paths
-
-```mermaid
-graph TD
-  B[Browser<br/>React + Vite]
-  A[Fastify API]
-  CF[Centrifugo Cluster]
-  DB[(PostgreSQL)]
-  B -- "HTTP / REST" --> A
-  B -- "WebSocket" --> CF
-  A -- "persist" --> DB
-  A -- "publish" --> CF
-  CF -- "broadcast" --> B
-```
-
-### Message Lifecycle
-
-The API is responsible for **validation and persistence**.
-
-Centrifugo is responsible for **realtime delivery**.
-
-This keeps WebSocket connection management out of the application server and keeps WebSocket connection state away from the API.
-
----
-
-## Tech Stack
-
-| Layer          | Technology                       |
-| -------------- | -------------------------------- |
-| Frontend       | React 19, Vite 8, TypeScript 6   |
-| Styling        | Tailwind CSS 4, Base UI          |
-| Routing        | `@typeroute/router`              |
-| API            | Fastify 5                        |
-| Authentication | better-auth                      |
-| Validation     | Zod, `fastify-type-provider-zod` |
-| Realtime       | Centrifugo                       |
-| Database       | PostgreSQL                       |
-| ORM            | Drizzle ORM                      |
-| Migrations     | drizzle-kit                      |
-| Testing        | Vitest, Testing Library          |
-| Code Quality   | Biome                            |
-| Monorepo       | pnpm workspaces + catalog        |
-| Infrastructure | Docker Compose, Caddy            |
+If publication fails after persistence, the message remains in the database even though currently connected clients may not immediately receive the realtime event. Message history therefore remains the authoritative persisted state.
 
 ---
 
@@ -130,13 +144,11 @@ The result is a zero-signup experience while retaining an authenticated API boun
 
 ---
 
-## Realtime Architecture
+## Realtime
 
 Centrifugo handles WebSocket connections and message distribution.
 
 The application server does **not** maintain individual WebSocket connections.
-
-Instead:
 
 ```mermaid
 graph TB
@@ -145,9 +157,7 @@ graph TB
   A --> DB[(PostgreSQL)]
 ```
 
-### Why Centrifugo?
-
-Centrifugo provides the realtime connection and fan-out layer without requiring the application to implement:
+This allows the API to remain focused on HTTP requests and persistence while Centrifugo handles:
 
 * WebSocket connection management
 * Subscription management
@@ -159,7 +169,7 @@ The tradeoff is additional infrastructure and operational complexity.
 
 ---
 
-## Data and API Contracts
+## Shared Data Contracts
 
 The project uses Zod as the shared contract definition.
 
@@ -168,17 +178,24 @@ graph TD
   P[packages/contracts]
   F[Frontend]
   S[Server]
+
   P --> F
   P --> S
+
   F --> FP[Parse data]
   S --> SP[Parse data]
 ```
 
-This prevents the frontend and backend from independently defining the same payload structure.
+Schemas live in `packages/contracts` and are consumed by both frontend and server.
 
-For example, realtime message publications are validated on both sides using the same schema.
+This provides:
 
-This provides a single source of truth for the application's wire format.
+* A single source of truth for wire formats
+* Runtime validation
+* Shared TypeScript types
+* Reduced API contract drift
+
+Realtime message publications are validated on both sides using the same schema.
 
 ---
 
@@ -199,6 +216,75 @@ The database schema is committed to the repository so that the application can b
 
 ---
 
+## Repository Structure
+
+```text
+.
+├── packages/
+│   ├── contracts/
+│   │   └── Shared Zod schemas and types
+│   │
+│   ├── frontend/
+│   │   └── React + Vite SPA
+│   │
+│   ├── server/
+│   │   └── Fastify API + Drizzle + better-auth
+│   │
+│   └── centrifugo/
+│       └── Centrifugo HTTP publish client
+│
+├── configs/
+│   ├── caddy/
+│   │   └── Local reverse proxy configuration
+│   │
+│   └── centrifugo/
+│       └── Centrifugo configuration
+│
+├── compose.yaml
+├── pnpm-workspace.yaml
+└── package.json
+```
+
+### Package Responsibilities
+
+#### `packages/contracts`
+
+The shared contract layer is the single source of truth for data exchanged between the frontend and backend.
+
+It contains the Zod schemas and inferred TypeScript types used by both applications.
+
+#### `packages/frontend`
+
+The React SPA responsible for:
+
+* Anonymous sign-in
+* Authentication state
+* Message history
+* Chat UI
+* Message submission
+* Centrifugo WebSocket connection
+* Realtime message handling
+
+#### `packages/server`
+
+The Fastify application responsible for:
+
+* Authentication
+* CSRF protection
+* API routes
+* Request validation
+* Message persistence
+* Database access
+* Publishing messages to Centrifugo
+
+#### `packages/centrifugo`
+
+A thin abstraction over Centrifugo's HTTP publish API.
+
+The server interacts with this package rather than making Centrifugo HTTP requests directly throughout the application.
+
+---
+
 ## Local Development
 
 ### Prerequisites
@@ -208,9 +294,9 @@ The database schema is committed to the repository so that the application can b
 * Docker
 * Docker Compose
 
-### 1. Configure environment
+### 1. Configure Environment
 
-Copy the environment templates into place for each component:
+Copy the environment templates into place:
 
 ```bash
 cp .env.example .env
@@ -218,9 +304,13 @@ cp packages/server/.env.example packages/server/.env
 cp packages/frontend/.env.example packages/frontend/.env
 ```
 
-- Root `.env` feeds `docker compose` (`POSTGRES_*`, `BETTER_AUTH_*`, `CENTRIFUGO_API_KEY`)
-- `packages/server/.env` feeds the API (`DATABASE_URL`, `CENTRIFUGO_URL`, `PORT`, `SERVER_URL`)
-- `packages/frontend/.env` feeds the client (`VITE_SERVER_URL`, `VITE_CENTRIFUGO_URL`)
+Each environment file serves a different component:
+
+| File                     | Used by        | Contains                                                             |
+| ------------------------ | -------------- | -------------------------------------------------------------------- |
+| `.env`                   | Docker Compose | PostgreSQL, better-auth, and Centrifugo infrastructure configuration |
+| `packages/server/.env`   | Fastify API    | Database, Centrifugo, and server configuration                       |
+| `packages/frontend/.env` | React frontend | API and WebSocket URLs                                               |
 
 Generate secrets where required:
 
@@ -228,9 +318,9 @@ Generate secrets where required:
 openssl rand -base64 32
 ```
 
-Set the same value for `BETTER_AUTH_SECRET` and `CENTRIFUGO_API_KEY` in both the root `.env` and `packages/server/.env`.
+The current development configuration expects `BETTER_AUTH_SECRET` and `CENTRIFUGO_API_KEY` to use the same generated value in both the root and server environment files.
 
-### 2. Start infrastructure
+### 2. Start Infrastructure
 
 ```bash
 docker compose up -d
@@ -242,19 +332,19 @@ This starts:
 * Three Centrifugo nodes
 * Caddy reverse proxy
 
-### 3. Install dependencies
+### 3. Install Dependencies
 
 ```bash
 pnpm install
 ```
 
-### 4. Run database migrations
+### 4. Run Database Migrations
 
 ```bash
 pnpm --filter server db:migrate
 ```
 
-### 5. Start development
+### 5. Start Development
 
 ```bash
 pnpm dev
@@ -273,15 +363,18 @@ pnpm dev
 
 ## Environment Variables
 
-| Variable              | Purpose                            |
-| --------------------- | ---------------------------------- |
-| `DATABASE_URL`        | PostgreSQL connection string       |
-| `POSTGRES_*`          | PostgreSQL Compose credentials     |
-| `BETTER_AUTH_SECRET`  | better-auth signing secret         |
-| `BETTER_AUTH_URL`     | Public server URL                  |
-| `CENTRIFUGO_API_KEY`  | Server → Centrifugo authentication |
-| `VITE_SERVER_URL`     | Frontend API base URL              |
-| `VITE_CENTRIFUGO_URL` | Frontend WebSocket URL             |
+| File            | Variable              | Purpose                            |
+| --------------- | --------------------- | ---------------------------------- |
+| Root `.env`     | `POSTGRES_*`          | PostgreSQL Compose credentials     |
+| Root `.env`     | `BETTER_AUTH_*`       | better-auth configuration          |
+| Root `.env`     | `CENTRIFUGO_API_KEY`  | Server → Centrifugo authentication |
+| Server `.env`   | `DATABASE_URL`        | PostgreSQL connection string       |
+| Server `.env`   | `CENTRIFUGO_URL`      | Centrifugo API URL                 |
+| Server `.env`   | `PORT`                | API port                           |
+| Server `.env`   | `ADDRESS`             | API bind address                   |
+| Server `.env`   | `SERVER_URL`          | Public API URL                     |
+| Frontend `.env` | `VITE_SERVER_URL`     | API base URL                       |
+| Frontend `.env` | `VITE_CENTRIFUGO_URL` | WebSocket URL                      |
 
 ---
 
@@ -310,7 +403,10 @@ Tests use Fastify's `inject()` API and exercise the application through the HTTP
 * CSRF protection
 * Request validation
 * Pagination and contract shape
-* Message persistence and realtime publishing (repositories and Centrifugo are mocked via `vi.spyOn`)
+* Message persistence
+* Realtime publishing
+
+Repositories and Centrifugo are mocked via `vi.spyOn` where appropriate.
 
 ### Frontend
 
@@ -322,17 +418,20 @@ Tests cover:
 * Authentication guards
 * Chat rendering
 * Message submission
-* Realtime message reception (publication handling)
+* Realtime message reception
+* Realtime publication handling
 
 External dependencies such as the authentication client, Centrifuge client, toast notifications, and `fetch` are mocked where appropriate.
 
 ### Code Quality
 
+Run all package linting:
+
 ```bash
 pnpm lint
 ```
 
-Lint individual packages:
+Or lint individual packages:
 
 ```bash
 pnpm --filter frontend lint
@@ -363,8 +462,6 @@ Centrifugo was selected as the realtime infrastructure rather than implementing 
 
 * Additional service to deploy and operate
 
----
-
 ### Anonymous Authentication
 
 better-auth provides anonymous authentication while maintaining an authenticated API boundary.
@@ -381,8 +478,6 @@ better-auth provides anonymous authentication while maintaining an authenticated
 
 * Anonymous users have no persistent identity or moderation profile
 
----
-
 ### Shared Zod Contracts
 
 Schemas live in `packages/contracts` and are consumed by both frontend and server.
@@ -398,17 +493,9 @@ Schemas live in `packages/contracts` and are consumed by both frontend and serve
 
 * Adds a shared package dependency between applications
 
----
-
 ### Drizzle ORM
 
 Drizzle was selected for its lightweight TypeScript-first API and close mapping to SQL.
-
-The project currently uses `1.0.0-rc.4` for its v1 API.
-
-The stable `0.45.x` line remains a drop-in alternative if a stable release is preferred.
-
----
 
 ### `@typeroute/router`
 
@@ -420,7 +507,7 @@ This allows route changes to surface compile-time errors rather than relying ent
 
 ## Known Limitations
 
-The current implementation intentionally keeps the feature set small.
+The implementation intentionally keeps the feature set small.
 
 ### Chat
 
@@ -436,6 +523,12 @@ The current implementation intentionally keeps the feature set small.
 * No persistent user profiles
 * Anonymous names are automatically generated
 * No moderation interface
+
+### Realtime Delivery
+
+Database persistence and Centrifugo publication are separate operations.
+
+A message can therefore be persisted successfully even if its realtime publication fails. Persisted message history remains the authoritative source of stored messages.
 
 ### TypeScript
 
