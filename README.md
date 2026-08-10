@@ -210,15 +210,25 @@ The database schema is committed to the repository so that the application can b
 
 ### 1. Configure environment
 
+Copy the environment templates into place for each component:
+
 ```bash
 cp .env.example .env
+cp packages/server/.env.example packages/server/.env
+cp packages/frontend/.env.example packages/frontend/.env
 ```
+
+- Root `.env` feeds `docker compose` (`POSTGRES_*`, `BETTER_AUTH_*`, `CENTRIFUGO_API_KEY`)
+- `packages/server/.env` feeds the API (`DATABASE_URL`, `CENTRIFUGO_URL`, `PORT`, `SERVER_URL`)
+- `packages/frontend/.env` feeds the client (`VITE_SERVER_URL`, `VITE_CENTRIFUGO_URL`)
 
 Generate secrets where required:
 
 ```bash
 openssl rand -base64 32
 ```
+
+Set the same value for `BETTER_AUTH_SECRET` and `CENTRIFUGO_API_KEY` in both the root `.env` and `packages/server/.env`.
 
 ### 2. Start infrastructure
 
