@@ -2,7 +2,8 @@
   "name": "chat",
   "version": "0.1.0",
   "private": true,
-  "license": "MIT",
+  "description": "Realtime anonymous group chat built on a pnpm monorepo with React, Fastify, PostgreSQL, and self-hosted Centrifugo.",
+  "license": "Apache-2.0",
   "author": "Ong Hin Journ <onghinjourn@gmail.com>",
   "packageManager": "pnpm@11.20.0",
   "engines": {
@@ -10,8 +11,16 @@
   },
   "keywords": [
     "chat",
+    "realtime",
     "websocket",
-    "react"
+    "centrifugo",
+    "fastify",
+    "react",
+    "postgresql",
+    "drizzle",
+    "monorepo",
+    "typescript",
+    "pnpm"
   ],
   "scripts": {
     "build": "concurrently \"pnpm --filter contracts run build\" \"pnpm --filter centrifugo run build\"",
