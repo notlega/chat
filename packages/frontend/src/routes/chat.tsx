@@ -245,10 +245,10 @@ export function Chat() {
 
   return (
     <div className="mx-auto flex h-dvh max-w-md flex-col gap-2 p-2">
-      <nav className="flex h-12 shrink-0 flex-row items-center justify-center">
+      <nav className="relative flex h-12 shrink-0 flex-row items-center justify-center">
         <Button
           variant="default"
-          className="absolute left-2 size-10 hover:cursor-pointer"
+          className="absolute top-1/2 left-2 size-10 -translate-y-1/2 hover:cursor-pointer"
           onClick={onSignOut}
         >
           <IconLogout2 className="size-6" />
